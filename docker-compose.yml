@@ -1,0 +1,29 @@
+version: '3'
+services:
+  cnosdb-meta:
+    image: ivankf/cnosdb-meta:latest
+    container_name: cnosdb-meta
+    ports:
+      - "31005:31005"
+    environment:
+      - RAFT_JOURNAL_PATH=/var/lib/cnosdb-meta/meta/journal
+      - META_LOGS_PATH=/var/lib/logs/cnosdb-meta
+      - RAFT_SNAPSHOT_PATH=/var/lib/cnosdb-meta/snapshot
+    command: "--http-addr 0.0.0.0:31005"
+  cnosdb:
+    image: ivankf/cnosdb:latest
+    container_name: cnosdb
+    environment:
+      - CNOSDB_HTTP_SERVER="cnosdb:31001"
+      - CNOSDB_GRPC_SERVER="cnosdb:31002"
+      - CNOSDB_TCP_SERVER="cnsodb:31003"
+      - CNOSDB_FLIGHT_RPC_SERVER="cnosdb:31004"
+      - CNOSDB_CLUSTER_META="cnosdb-meta:31005"
+    ports:
+      - "31001"
+      - "31002"
+      - "31003"
+      - "31004"
+    volumes:
+      - ./etc/cnosdb:/etc/cnosdb
+      - ./var/lib/cnosdb:/var/lib/cnosdb
